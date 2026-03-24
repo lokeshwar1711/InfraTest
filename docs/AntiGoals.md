@@ -98,22 +98,24 @@ InfraTest validates runtime reality, not configuration intent.
 
 ---
 
-## Anti Goal 4 — Creating a Custom DSL
+## Anti Goal 4 — Creating a Complex Custom DSL
 
-Creating a configuration language or testing DSL early will significantly reduce adoption.
+Creating a proprietary configuration language or scripting DSL early will significantly reduce adoption.
 
 Engineers do not want to learn another syntax to verify infrastructure.
 
+Acceptable in V1:
+
+* a small, explicit YAML file (`infra-test.yaml`)
+
 Avoid introducing:
 
-* YAML-based testing definitions
 * rule scripting languages
-* custom configuration schemas
-* complex declarative validation systems
+* custom parser ecosystems
+* complex declarative abstractions that require domain training
 
-InfraTest should work automatically whenever possible.
-
-Manual configuration should be minimal and optional.
+InfraTest should move toward lower configuration over time,
+but V1 keeps YAML simple and practical.
 
 ---
 

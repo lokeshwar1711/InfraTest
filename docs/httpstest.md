@@ -88,7 +88,7 @@ Each component remains independently extensible.
 User executes:
 
 ```
-infratest run infra-test.yaml
+infratest verify infra-test.yaml
 ```
 
 CLI responsibilities:

@@ -110,7 +110,7 @@ Typer provides:
 Example command model:
 
 ```
-infratest run infra-test.yaml
+infratest verify infra-test.yaml
 ```
 
 CLI-first interaction ensures:

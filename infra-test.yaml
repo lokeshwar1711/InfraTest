@@ -1,0 +1,14 @@
+tests:
+  - name: api-health
+    type: http
+    endpoint: https://httpbin.org/status/200
+    expect_status: 200
+    method: GET
+    timeout: 5
+
+  - name: docs-home
+    type: http
+    endpoint: https://example.com/
+    expect_status: 200
+    method: GET
+    timeout: 5

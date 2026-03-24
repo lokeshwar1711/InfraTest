@@ -32,7 +32,7 @@ The MVP must NOT include:
 - Web UI
 - Multi-cloud support
 - Plugin systems
-- Custom DSLs
+- Complex custom DSLs
 - AI automation
 - Complex configuration
 - Kubernetes-native orchestration
@@ -61,7 +61,7 @@ Expected usage:
 
 terraform apply
 |
-infratest verify
+infratest verify infra-test.yaml
 
 
 Output:
@@ -74,6 +74,12 @@ Deployment Unsafe ❌
 
 InfraTest integrates naturally into CI/CD pipelines.
 
+MVP input model:
+
+- YAML configuration file (`infra-test.yaml`) is required in V1
+- Keep schema intentionally small and explicit
+- Auto-discovery is a later enhancement, not a V1 dependency
+
 ---
 
 # MVP Success Criteria
@@ -84,6 +90,19 @@ The MVP succeeds if:
 - InfraTest runs inside CI pipelines
 - Engineers trust InfraTest output
 - Setup time is under 5 minutes
+
+---
+
+# MVP KPIs (Baseline)
+
+Track these from first internal pilot onward:
+
+- Time to first successful run: median under 10 minutes
+- Verification runtime per pipeline: p95 under 3 minutes
+- Exit code reliability: 100% deterministic (`0` pass / `1` fail / `2` execution error)
+- False positive rate: under 10% in first 30 days
+- Pre-deploy issues caught: at least 1 real issue in first 30 days of pilot usage
+- CI adoption: at least 2 pipelines gated by InfraTest before MVP completion
 
 ---
 
@@ -212,14 +231,13 @@ InfraTest must run without persistent services.
 
 Configuration must be minimal.
 
-Preferred approach:
+V1 approach:
 
-infratest verify --auto-discover
+infratest verify infra-test.yaml
 
+InfraTest should provide a simple YAML schema with sensible defaults.
 
-InfraTest should infer expectations whenever possible.
-
-Manual configuration is last resort.
+Auto-discovery remains a post-MVP milestone after core verification stability is proven.
 
 ---
 
@@ -281,6 +299,17 @@ Support:
 - Pipeline blocking
 
 InfraTest becomes deployment gate.
+
+---
+
+## Phase 5 — Auto-Discovery (Post-MVP)
+
+Add:
+- optional expectation inference from Terraform outputs
+- environment context hints
+
+Goal:
+reduce manual YAML over time without increasing MVP complexity.
 
 ---
 

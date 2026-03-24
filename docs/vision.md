@@ -179,7 +179,7 @@ Example CI step:
   run: terraform apply -auto-approve
 
 - name: Validate Infrastructure
-  run: infratest run infra-test.yaml
+  run: infratest verify infra-test.yaml
 ```
 
 ---

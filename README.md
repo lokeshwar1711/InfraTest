@@ -107,7 +107,7 @@ Typical CI/CD workflow:
 ```
 Terraform Apply
         ↓
-InfraTest Run
+InfraTest Verify
         ↓
 Application Deployment
 ```
@@ -157,13 +157,55 @@ The focus is intentionally narrow:
 
 ## 🚀 Current Status
 
-🚧 Early development / concept phase.
+✅ MVP implemented (HTTP validation engine, YAML-driven CLI, CI exit-code contract).
 
 Initial work focuses on defining:
 
 * core validation model
 * execution engine
 * pipeline integration workflow
+
+---
+
+## 🛠️ Quick Start
+
+### 1) Install
+
+```bash
+pip install -e .
+```
+
+### 2) Run Verification
+
+```bash
+infratest verify infra-test.yaml
+```
+
+### 3) CI-Friendly JSON Report
+
+```bash
+infratest verify infra-test.yaml --output both --output-path infratest-report.json
+```
+
+Exit code contract:
+
+* `0` = all checks passed
+* `1` = one or more checks failed
+* `2` = InfraTest execution/configuration error
+
+---
+
+## 🧪 Example YAML
+
+```yaml
+tests:
+        - name: api-health
+                type: http
+                endpoint: https://api.example.com/health
+                expect_status: 200
+                method: GET
+                timeout: 5
+```
 
 ---
 

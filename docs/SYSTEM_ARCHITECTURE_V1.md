@@ -75,9 +75,8 @@ Responsibilities:
 
 Example commands:
 
-infratest verify
-infratest verify --auto-discover
-infratest verify --output json
+infratest verify infra-test.yaml
+infratest verify infra-test.yaml --output json
 
 Implementation Recommendation:
 
@@ -182,7 +181,7 @@ They must not directly call cloud SDKs.
 
 ## Layer 5 — Context Discovery System
 
-InfraTest should automatically discover environment details when possible.
+InfraTest should support environment context discovery as a later phase.
 
 Sources include:
 
@@ -193,13 +192,15 @@ Runtime endpoints
 
 Goal:
 
-Reduce required configuration.
+Reduce required configuration over time.
 
 Preferred user experience:
 
-infratest verify --auto-discover
+infratest verify infra-test.yaml
 
-Manual configuration is fallback only.
+In V1, explicit YAML configuration is the default and required input model.
+
+Auto-discovery is planned post-MVP after core verification reliability is established.
 
 ---
 
