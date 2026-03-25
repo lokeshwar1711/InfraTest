@@ -1,0 +1,757 @@
+{
+  "success": false,
+  "total": 36,
+  "passed": 32,
+  "failed": 4,
+  "results": [
+    {
+      "name": "aws-caller-identity",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1925,
+      "target": "sts.get_caller_identity",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "sts",
+        "operation": "get_caller_identity",
+        "response_keys": [
+          "Account",
+          "Arn",
+          "ResponseMetadata",
+          "UserId"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ec2-describe-vpcs",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 2200,
+      "target": "ec2.describe_vpcs",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ec2",
+        "operation": "describe_vpcs",
+        "response_keys": [
+          "ResponseMetadata",
+          "Vpcs"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ec2-describe-security-groups",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 3859,
+      "target": "ec2.describe_security_groups",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ec2",
+        "operation": "describe_security_groups",
+        "response_keys": [
+          "ResponseMetadata",
+          "SecurityGroups"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "elbv2-describe-load-balancers",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1942,
+      "target": "elbv2.describe_load_balancers",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "elbv2",
+        "operation": "describe_load_balancers",
+        "response_keys": [
+          "LoadBalancers",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "apigateway-list-rest-apis",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1719,
+      "target": "apigateway.get_rest_apis",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "apigateway",
+        "operation": "get_rest_apis",
+        "response_keys": [
+          "ResponseMetadata",
+          "items",
+          "position"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "apigatewayv2-list-apis",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1712,
+      "target": "apigatewayv2.get_apis",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "apigatewayv2",
+        "operation": "get_apis",
+        "response_keys": [
+          "Items",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ecs-list-clusters",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1961,
+      "target": "ecs.list_clusters",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ecs",
+        "operation": "list_clusters",
+        "response_keys": [
+          "ResponseMetadata",
+          "clusterArns"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ecs-describe-apiportal-uat",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1708,
+      "target": "ecs.describe_clusters",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ecs",
+        "operation": "describe_clusters",
+        "response_keys": [
+          "ResponseMetadata",
+          "clusters",
+          "failures"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "eks-list-clusters",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1419,
+      "target": "eks.list_clusters",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "eks",
+        "operation": "list_clusters",
+        "response_keys": [
+          "ResponseMetadata",
+          "clusters"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "eks-describe-awx-cluster",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1506,
+      "target": "eks.describe_cluster",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "eks",
+        "operation": "describe_cluster",
+        "response_keys": [
+          "ResponseMetadata",
+          "cluster"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "lambda-list-functions",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "FAIL",
+      "message": "AWS SDK error: SSL validation failed for https://lambda.us-east-1.amazonaws.com/2015-03-31/functions [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)",
+      "execution_time_ms": 1166,
+      "target": "lambda.list_functions",
+      "expected": "access granted",
+      "actual": "SSLError",
+      "metadata": {
+        "service": "lambda",
+        "operation": "list_functions",
+        "error_type": "botocore_error",
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "rds-describe-db-instances",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 4081,
+      "target": "rds.describe_db_instances",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "rds",
+        "operation": "describe_db_instances",
+        "response_keys": [
+          "DBInstances",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "rds-describe-ansible-test-db-instance-2",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1918,
+      "target": "rds.describe_db_instances",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "rds",
+        "operation": "describe_db_instances",
+        "response_keys": [
+          "DBInstances",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "elasticache-describe-cache-clusters",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 2164,
+      "target": "elasticache.describe_cache_clusters",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "elasticache",
+        "operation": "describe_cache_clusters",
+        "response_keys": [
+          "CacheClusters",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "s3-list-buckets",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 3093,
+      "target": "s3.list_buckets",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "s3",
+        "operation": "list_buckets",
+        "response_keys": [
+          "Buckets",
+          "Owner",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "s3-head-agentic-ai-csv-uploads",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1488,
+      "target": "s3.head_bucket",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "s3",
+        "operation": "head_bucket",
+        "response_keys": [
+          "AccessPointAlias",
+          "BucketArn",
+          "BucketRegion",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "dynamodb-list-tables",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1528,
+      "target": "dynamodb.list_tables",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "dynamodb",
+        "operation": "list_tables",
+        "response_keys": [
+          "ResponseMetadata",
+          "TableNames"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "dynamodb-describe-ami-inventory-table",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1479,
+      "target": "dynamodb.describe_table",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "dynamodb",
+        "operation": "describe_table",
+        "response_keys": [
+          "ResponseMetadata",
+          "Table"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "sqs-list-queues",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "FAIL",
+      "message": "AWS SDK error: SSL validation failed for https://sqs.us-east-1.amazonaws.com/ [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)",
+      "execution_time_ms": 527,
+      "target": "sqs.list_queues",
+      "expected": "access granted",
+      "actual": "SSLError",
+      "metadata": {
+        "service": "sqs",
+        "operation": "list_queues",
+        "error_type": "botocore_error",
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "sqs-get-adolfd-unified-queue-attrs",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "FAIL",
+      "message": "AWS SDK error: SSL validation failed for https://sqs.us-east-1.amazonaws.com/ [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)",
+      "execution_time_ms": 444,
+      "target": "sqs.get_queue_attributes",
+      "expected": "access granted",
+      "actual": "SSLError",
+      "metadata": {
+        "service": "sqs",
+        "operation": "get_queue_attributes",
+        "error_type": "botocore_error",
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "sns-list-topics",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1890,
+      "target": "sns.list_topics",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "sns",
+        "operation": "list_topics",
+        "response_keys": [
+          "ResponseMetadata",
+          "Topics"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "sns-get-awx-topic-attrs",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1756,
+      "target": "sns.get_topic_attributes",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "sns",
+        "operation": "get_topic_attributes",
+        "response_keys": [
+          "Attributes",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "secretsmanager-list-secrets",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1896,
+      "target": "secretsmanager.list_secrets",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "secretsmanager",
+        "operation": "list_secrets",
+        "response_keys": [
+          "NextToken",
+          "ResponseMetadata",
+          "SecretList"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "secretsmanager-describe-sample-secret",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1588,
+      "target": "secretsmanager.describe_secret",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "secretsmanager",
+        "operation": "describe_secret",
+        "response_keys": [
+          "ARN",
+          "CreatedDate",
+          "Description",
+          "LastAccessedDate",
+          "LastChangedDate",
+          "Name",
+          "ResponseMetadata",
+          "Tags",
+          "VersionIdsToStages"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ssm-describe-parameters",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1811,
+      "target": "ssm.describe_parameters",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ssm",
+        "operation": "describe_parameters",
+        "response_keys": [
+          "NextToken",
+          "Parameters",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "kms-list-keys",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "FAIL",
+      "message": "AWS SDK error: SSL validation failed for https://kms.us-east-1.amazonaws.com/ [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)",
+      "execution_time_ms": 474,
+      "target": "kms.list_keys",
+      "expected": "access granted",
+      "actual": "SSLError",
+      "metadata": {
+        "service": "kms",
+        "operation": "list_keys",
+        "error_type": "botocore_error",
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ecr-describe-repositories",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 2148,
+      "target": "ecr.describe_repositories",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ecr",
+        "operation": "describe_repositories",
+        "response_keys": [
+          "ResponseMetadata",
+          "repositories"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "ecr-describe-ticketflow-repo",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1859,
+      "target": "ecr.describe_repositories",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "ecr",
+        "operation": "describe_repositories",
+        "response_keys": [
+          "ResponseMetadata",
+          "repositories"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "cloudfront-list-distributions",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 3237,
+      "target": "cloudfront.list_distributions",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "cloudfront",
+        "operation": "list_distributions",
+        "response_keys": [
+          "DistributionList",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "cloudfront-get-sample-distribution",
+      "type": "aws_iam",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1829,
+      "target": "cloudfront.get_distribution",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "cloudfront",
+        "operation": "get_distribution",
+        "response_keys": [
+          "Distribution",
+          "ETag",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "route53-list-hosted-zones",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 2321,
+      "target": "route53.list_hosted_zones",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "route53",
+        "operation": "list_hosted_zones",
+        "response_keys": [
+          "HostedZones",
+          "IsTruncated",
+          "MaxItems",
+          "NextMarker",
+          "ResponseMetadata"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "logs-describe-log-groups",
+      "type": "aws_iam",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "AWS API call succeeded",
+      "execution_time_ms": 1711,
+      "target": "logs.describe_log_groups",
+      "expected": "access granted",
+      "actual": "access granted",
+      "metadata": {
+        "service": "logs",
+        "operation": "describe_log_groups",
+        "response_keys": [
+          "ResponseMetadata",
+          "logGroups",
+          "nextToken"
+        ],
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "http-cloudfront-d20pe9fdg91u0s",
+      "type": "http",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "403 Forbidden",
+      "execution_time_ms": 702,
+      "target": "https://d20pe9fdg91u0s.cloudfront.net/",
+      "expected": "status in [200, 403, 404]",
+      "actual": "status=403; final_url=https://d20pe9fdg91u0s.cloudfront.net/",
+      "metadata": {
+        "http_version": "HTTP/1.1",
+        "final_url": "https://d20pe9fdg91u0s.cloudfront.net/",
+        "redirect_count": "0",
+        "attempt": 1,
+        "max_attempts": 2
+      }
+    },
+    {
+      "name": "tcp-cloudfront-d20pe9fdg91u0s-443",
+      "type": "tcp",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "TCP connection succeeded",
+      "execution_time_ms": 2,
+      "target": "d20pe9fdg91u0s.cloudfront.net:443",
+      "expected": "port open",
+      "actual": "connection opened",
+      "metadata": {
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "http-apigateway-agentic-ai-runbook-api",
+      "type": "http",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "404 Not Found",
+      "execution_time_ms": 1291,
+      "target": "https://jl6ctp4vp3.execute-api.us-east-1.amazonaws.com/",
+      "expected": "status in [200, 403, 404]",
+      "actual": "status=404; final_url=https://jl6ctp4vp3.execute-api.us-east-1.amazonaws.com/",
+      "metadata": {
+        "http_version": "HTTP/1.1",
+        "final_url": "https://jl6ctp4vp3.execute-api.us-east-1.amazonaws.com/",
+        "redirect_count": "0",
+        "attempt": 1,
+        "max_attempts": 2
+      }
+    },
+    {
+      "name": "tcp-apigateway-agentic-ai-runbook-api-443",
+      "type": "tcp",
+      "severity": "advisory",
+      "status": "PASS",
+      "message": "TCP connection succeeded",
+      "execution_time_ms": 14,
+      "target": "jl6ctp4vp3.execute-api.us-east-1.amazonaws.com:443",
+      "expected": "port open",
+      "actual": "connection opened",
+      "metadata": {
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    }
+  ],
+  "blocking_failed": 1,
+  "advisory_failed": 3
+}

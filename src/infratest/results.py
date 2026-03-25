@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from infratest.models import Severity
+
 
 class TestStatus(str, Enum):
     """Verification status for a single check."""
@@ -19,13 +21,19 @@ class TestResult:
     """Result of executing one test definition."""
 
     name: str
+    test_type: str
+    severity: Severity
     status: TestStatus
     message: str
     execution_time_ms: int
-    expected_status: int
-    actual_status: int | None
-    endpoint: str
+    target: str
+    expected: str | None
+    actual: str | None
     metadata: dict[str, Any]
+
+    @property
+    def blocks_deployment(self) -> bool:
+        return self.status is TestStatus.FAIL and self.severity is Severity.BLOCKING
 
 
 @dataclass(slots=True)
@@ -47,5 +55,17 @@ class RunSummary:
         return self.total - self.passed
 
     @property
+    def blocking_failed(self) -> int:
+        return sum(1 for result in self.results if result.blocks_deployment)
+
+    @property
+    def advisory_failed(self) -> int:
+        return sum(
+            1
+            for result in self.results
+            if result.status is TestStatus.FAIL and not result.blocks_deployment
+        )
+
+    @property
     def success(self) -> bool:
-        return self.failed == 0
+        return self.blocking_failed == 0

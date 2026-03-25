@@ -2,368 +2,155 @@
 
 ## Purpose
 
-This document defines the internal architecture of InfraTest Version 1.
+This document describes the current executable architecture in the repository.
 
-The goal of this architecture is simplicity, extensibility, and fast iteration.
+The design goal is still simplicity, but the architecture now reflects the features that actually ship: HTTP checks, TCP checks, AWS runtime IAM checks, retry policy, and execution-context awareness.
 
-InfraTest V1 prioritizes development speed and usability over scalability or optimization.
+## Runtime Shape
 
-This architecture intentionally avoids distributed systems, backend services, or complex abstractions.
+InfraTest remains a local or pipeline-run CLI.
 
-InfraTest must remain a local-first verification engine.
+Execution flow:
 
----
+1. CLI loads YAML configuration
+2. CLI receives active execution contexts from repeated `--context` flags
+3. Pydantic validates discriminated test definitions
+4. Engine enforces context requirements and retry policy
+5. Test-specific validator executes the live check
+6. Reporting layer emits console and optional JSON output
+7. CLI exits with a deployment-gating code
 
-## Technology Decision
+## Layers
 
-Primary Language: Python
-
-Reasoning:
-
-* Fast development velocity
-* Strong cloud SDK ecosystem
-* Excellent AWS integration via boto3
-* Easy experimentation
-* Lower cognitive overhead for solo development
-* Ideal for early-stage validation
-
-Performance is not a concern for MVP.
-
-Execution clarity and iteration speed are higher priorities.
-
----
-
-## High-Level Architecture
-
-InfraTest operates as a command-line verification engine.
-
-Execution Flow:
-
-User runs InfraTest CLI
-→ InfraTest collects environment context
-→ Validation engine executes checks
-→ Results aggregated
-→ Deployment decision returned
-
-No persistent services exist in V1.
-
----
-
-## System Overview
-
-Architecture Layers:
-
-CLI Layer
-Core Engine
-Validation Modules
-Cloud Providers
-Reporting System
-
-Each layer has a single responsibility.
-
----
-
-## Layer 1 — CLI Layer
+### CLI Layer
 
 Responsibilities:
 
-* command parsing
-* argument handling
-* execution trigger
-* exit code management
-* user interaction
+- parse command-line arguments
+- accept `--context` labels for the current run
+- load configuration
+- invoke the engine
+- render output and exit codes
 
-Example commands:
-
-infratest verify infra-test.yaml
-infratest verify infra-test.yaml --output json
-
-Implementation Recommendation:
-
-Use Python argparse or typer.
-
-CLI must remain thin.
-
-Business logic must never exist here.
-
----
-
-## Layer 2 — Core Engine
-
-This is the heart of InfraTest.
+### Configuration Layer
 
 Responsibilities:
 
-* orchestration of validations
-* execution lifecycle
-* module loading
-* timeout handling
-* result aggregation
+- parse YAML
+- enforce strict schema validation
+- reject logically inconsistent checks
 
-Core Engine Flow:
+Examples of rejected combinations:
 
-Initialize runtime
-Load validation modules
-Execute validations sequentially
-Collect results
-Compute environment readiness
-Return final verdict
+- `HEAD` with `body_contains`
+- `expected_final_url` when redirects are disabled
+- `expected_error_codes` on a positive AWS access assertion
 
-The engine does not know cloud-specific logic.
-
-It only coordinates execution.
-
----
-
-## Layer 3 — Validation Modules
-
-Validation modules perform actual infrastructure checks.
-
-Each validation represents one confidence signal.
-
-Examples:
-
-ReachabilityCheck
-NetworkConnectivityCheck
-IAMRuntimeCheck
-DependencyHealthCheck
-
-Design Rule:
-
-Each validation must be independent.
-
-Validation modules must:
-
-* accept context
-* perform check
-* return structured result
-
-Expected Output Structure:
-
-status
-message
-metadata
-severity
-execution_time
-
-Failures must never crash InfraTest.
-
-Failures must only return failed validation results.
-
----
-
-## Layer 4 — Cloud Provider Layer
-
-Responsible for interacting with cloud infrastructure.
-
-V1 supports:
-
-AWS only.
+### Engine Layer
 
 Responsibilities:
 
-* resource discovery
-* credential usage
-* runtime access testing
-* metadata retrieval
+- sequential orchestration
+- start-delay handling
+- retry handling
+- execution-context enforcement
+- summary aggregation
 
-Implementation:
+The engine is intentionally synchronous for now because deployment-gate trust is more important than early parallelism.
 
-Use boto3 SDK.
+### Validator Layer
 
-Provider logic must remain isolated so additional providers can be added later without rewriting validation logic.
+Current validators:
 
-Validation modules request data through provider interfaces.
+- `http_validator`
+- `tcp_validator`
+- `aws_iam_validator`
 
-They must not directly call cloud SDKs.
+Each validator:
 
----
+- accepts one typed test definition
+- executes a live check
+- never raises expected infra failures into the CLI path
+- returns a structured `TestResult`
 
-## Layer 5 — Context Discovery System
-
-InfraTest should support environment context discovery as a later phase.
-
-Sources include:
-
-Terraform outputs
-Environment variables
-AWS metadata APIs
-Runtime endpoints
-
-Goal:
-
-Reduce required configuration over time.
-
-Preferred user experience:
-
-infratest verify infra-test.yaml
-
-In V1, explicit YAML configuration is the default and required input model.
-
-Auto-discovery is planned post-MVP after core verification reliability is established.
-
----
-
-## Layer 6 — Reporting System
-
-Responsible for presenting results.
+### Reporting Layer
 
 Outputs:
 
-Human-readable console report
-Machine-readable JSON output
+- rich console table
+- stable JSON summary
 
-Example Console Output:
+Results include:
 
-InfraTest Verification Report
+- test type
+- severity
+- target
+- expected value
+- actual value
+- execution time
+- structured metadata
 
-DNS Resolution PASS
-Load Balancer Reachability PASS
-Service Connectivity FAIL
+## Execution Context Model
 
-Environment Score: 75%
-Deployment Blocked
+This is the most important addition for product correctness.
 
-Reporting must remain simple and readable.
+Tests may declare `execution_contexts`, for example:
 
-No visualization systems in V1.
+- `public`
+- `private-runner`
+- `vpn`
+- `local`
+- `aws`
 
----
+The CLI provides active contexts for the run. If none of a test's required contexts are active, InfraTest records an explicit failure instead of pretending the check was meaningful.
 
-## Execution Model
+This keeps private-network and credential-scoped assertions honest.
 
-Execution Style:
+## Severity Model
 
-Synchronous execution.
+Every test is either:
 
-Parallel execution is intentionally avoided initially to simplify debugging and reliability.
+- `blocking`
+- `advisory`
 
-Optimization can occur later.
+Blocking failures produce exit code `1`.
 
----
+Advisory failures are visible in reports but do not block deployment when all blocking checks pass.
 
-## Error Handling Philosophy
+## AWS Runtime IAM Model
 
-InfraTest must never fail silently.
+AWS checks execute real boto3 operations with the credentials already present in the environment.
 
-Rules:
+This is important because InfraTest is verifying runtime behavior, not policy text.
 
-Infrastructure failure → validation failure
-InfraTest bug → explicit error message
-Cloud timeout → failed validation
+The current repository supports:
 
-InfraTest crashing equals loss of trust.
+- positive assertions: the operation must succeed
+- negative assertions: the operation must fail with an expected access-denied code
 
-Stability is mandatory.
+## JSON Reporting Model
 
----
+JSON output is now part of the stable execution path rather than a later enhancement.
 
-## Exit Codes
+The writer creates parent directories as needed and returns a controlled execution error if the report cannot be written.
 
-InfraTest integrates with CI/CD through exit codes.
+## Current Limitations
 
-0 → Environment Verified
-1 → Validation Failed
-2 → InfraTest Execution Error
+Still intentionally missing:
 
-This enables pipeline gating.
+- distributed execution
+- hosted control plane
+- auto-discovery from Terraform or cloud metadata
+- multi-cloud provider abstractions
+- parallel execution
 
----
+These remain future architecture work, not current repository concerns.
 
-## Repository Structure Recommendation
+## Sellable-Service Direction
 
-src/
+The technically clean next step is to split the system into:
 
-cli/
-engine/
-validators/
-providers/
-reporting/
-utils/
+- customer-run execution plane
+- separate control plane
 
-Example:
-
-src/infratest/
-src/infratest/cli
-src/infratest/engine
-src/infratest/validators
-src/infratest/providers/aws
-src/infratest/reporting
-
-Clear boundaries prevent architecture drift.
-
----
-
-## Dependency Philosophy
-
-Dependencies must remain minimal.
-
-Allowed:
-
-boto3
-requests
-typer or argparse
-pydantic (optional)
-
-Avoid heavy frameworks.
-
-InfraTest must remain lightweight.
-
----
-
-## Observability (Internal Only)
-
-Logging allowed:
-
-info
-warning
-error
-
-No telemetry collection in V1.
-
-User trust comes before analytics.
-
----
-
-## Security Principles
-
-InfraTest never stores credentials.
-
-InfraTest uses existing cloud authentication:
-
-AWS CLI credentials
-IAM roles
-environment credentials
-
-No secret persistence.
-
----
-
-## Future Compatibility
-
-Architecture must allow:
-
-Parallel execution
-Plugin system
-Multi-cloud providers
-Hosted verification service
-
-But these must not influence V1 complexity.
-
----
-
-## Architectural Guiding Rule
-
-InfraTest is a verification engine.
-
-Not a platform.
-Not a service.
-Not an orchestrator.
-
-Every architectural decision must preserve simplicity.
-
----
-
-## Final Principle
-
-If InfraTest becomes harder to understand than the infrastructure it validates, the architecture has failed.
+That lets a future service schedule checks from the correct network zones without weakening trust in the result.

@@ -1,0 +1,349 @@
+tests:
+  - name: aws-caller-identity
+    type: aws_iam
+    service: sts
+    operation: get_caller_identity
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: ec2-describe-vpcs
+    type: aws_iam
+    service: ec2
+    operation: describe_vpcs
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: ec2-describe-security-groups
+    type: aws_iam
+    service: ec2
+    operation: describe_security_groups
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: elbv2-describe-load-balancers
+    type: aws_iam
+    service: elbv2
+    operation: describe_load_balancers
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: apigateway-list-rest-apis
+    type: aws_iam
+    service: apigateway
+    operation: get_rest_apis
+    region: us-east-1
+    parameters:
+      limit: 10
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: apigatewayv2-list-apis
+    type: aws_iam
+    service: apigatewayv2
+    operation: get_apis
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: ecs-list-clusters
+    type: aws_iam
+    service: ecs
+    operation: list_clusters
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: ecs-describe-apiportal-uat
+    type: aws_iam
+    service: ecs
+    operation: describe_clusters
+    region: us-east-1
+    parameters:
+      clusters:
+        - arn:aws:ecs:us-east-1:172694458017:cluster/apiportal-uat
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: eks-list-clusters
+    type: aws_iam
+    service: eks
+    operation: list_clusters
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: eks-describe-awx-cluster
+    type: aws_iam
+    service: eks
+    operation: describe_cluster
+    region: us-east-1
+    parameters:
+      name: awx-us-east-1-a
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: lambda-list-functions
+    type: aws_iam
+    service: lambda
+    operation: list_functions
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: rds-describe-db-instances
+    type: aws_iam
+    service: rds
+    operation: describe_db_instances
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: rds-describe-ansible-test-db-instance-2
+    type: aws_iam
+    service: rds
+    operation: describe_db_instances
+    region: us-east-1
+    parameters:
+      DBInstanceIdentifier: ansible-test-db-instance-2
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: elasticache-describe-cache-clusters
+    type: aws_iam
+    service: elasticache
+    operation: describe_cache_clusters
+    region: us-east-1
+    parameters:
+      ShowCacheNodeInfo: false
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: s3-list-buckets
+    type: aws_iam
+    service: s3
+    operation: list_buckets
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: s3-head-agentic-ai-csv-uploads
+    type: aws_iam
+    service: s3
+    operation: head_bucket
+    region: us-east-1
+    parameters:
+      Bucket: agentic-ai-csv-uploads-172694458017
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: dynamodb-list-tables
+    type: aws_iam
+    service: dynamodb
+    operation: list_tables
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: dynamodb-describe-ami-inventory-table
+    type: aws_iam
+    service: dynamodb
+    operation: describe_table
+    region: us-east-1
+    parameters:
+      TableName: AMI_Inventory_Table
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: sqs-list-queues
+    type: aws_iam
+    service: sqs
+    operation: list_queues
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: sqs-get-adolfd-unified-queue-attrs
+    type: aws_iam
+    service: sqs
+    operation: get_queue_attributes
+    region: us-east-1
+    parameters:
+      QueueUrl: https://queue.amazonaws.com/172694458017/ADOFDUnifiedQueue
+      AttributeNames:
+        - QueueArn
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: sns-list-topics
+    type: aws_iam
+    service: sns
+    operation: list_topics
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: sns-get-awx-topic-attrs
+    type: aws_iam
+    service: sns
+    operation: get_topic_attributes
+    region: us-east-1
+    parameters:
+      TopicArn: arn:aws:sns:us-east-1:172694458017:AWX-Tower-Notifications
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: secretsmanager-list-secrets
+    type: aws_iam
+    service: secretsmanager
+    operation: list_secrets
+    region: us-east-1
+    parameters:
+      MaxResults: 10
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: secretsmanager-describe-sample-secret
+    type: aws_iam
+    service: secretsmanager
+    operation: describe_secret
+    region: us-east-1
+    parameters:
+      SecretId: solserv-uat-sftptransfer-apacsol1
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: ssm-describe-parameters
+    type: aws_iam
+    service: ssm
+    operation: describe_parameters
+    region: us-east-1
+    parameters:
+      MaxResults: 10
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: kms-list-keys
+    type: aws_iam
+    service: kms
+    operation: list_keys
+    region: us-east-1
+    parameters:
+      Limit: 10
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: ecr-describe-repositories
+    type: aws_iam
+    service: ecr
+    operation: describe_repositories
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: ecr-describe-ticketflow-repo
+    type: aws_iam
+    service: ecr
+    operation: describe_repositories
+    region: us-east-1
+    parameters:
+      repositoryNames:
+        - eesi/dev/ticketflow.freshdesk.adaptor.link.service
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: cloudfront-list-distributions
+    type: aws_iam
+    service: cloudfront
+    operation: list_distributions
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: cloudfront-get-sample-distribution
+    type: aws_iam
+    service: cloudfront
+    operation: get_distribution
+    region: us-east-1
+    parameters:
+      Id: E1D8UBF92VU2ET
+    expect_access: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: route53-list-hosted-zones
+    type: aws_iam
+    service: route53
+    operation: list_hosted_zones
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: logs-describe-log-groups
+    type: aws_iam
+    service: logs
+    operation: describe_log_groups
+    region: us-east-1
+    parameters:
+      limit: 10
+    expect_access: true
+    execution_contexts: [aws]
+
+  - name: http-cloudfront-d20pe9fdg91u0s
+    type: http
+    endpoint: https://d20pe9fdg91u0s.cloudfront.net/
+    expect_status: [200, 403, 404]
+    method: GET
+    timeout: 10
+    retries: 1
+    retry_interval: 2
+    follow_redirects: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: tcp-cloudfront-d20pe9fdg91u0s-443
+    type: tcp
+    host: d20pe9fdg91u0s.cloudfront.net
+    port: 443
+    expect_open: true
+    timeout: 5
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: http-apigateway-agentic-ai-runbook-api
+    type: http
+    endpoint: https://jl6ctp4vp3.execute-api.us-east-1.amazonaws.com/
+    expect_status: [200, 403, 404]
+    method: GET
+    timeout: 10
+    retries: 1
+    retry_interval: 2
+    follow_redirects: true
+    execution_contexts: [aws]
+    severity: advisory
+
+  - name: tcp-apigateway-agentic-ai-runbook-api-443
+    type: tcp
+    host: jl6ctp4vp3.execute-api.us-east-1.amazonaws.com
+    port: 443
+    expect_open: true
+    timeout: 5
+    execution_contexts: [aws]
+    severity: advisory

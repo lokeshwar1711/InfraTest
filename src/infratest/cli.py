@@ -62,11 +62,19 @@ def verify(
         "--output-path",
         help="Path for JSON report output.",
     ),
+    context: list[str] = typer.Option(
+        None,
+        "--context",
+        help=(
+            "Active execution context labels for this run. "
+            "Repeat the option to supply multiple contexts."
+        ),
+    ),
 ) -> None:
     """Verify infrastructure behavior using YAML-defined tests."""
     try:
         config = load_config(config_path)
-        summary = run_verification(config)
+        summary = run_verification(config, active_contexts=set(context or []))
 
         if output in {OutputMode.CONSOLE, OutputMode.BOTH}:
             render_console(summary, console=console)

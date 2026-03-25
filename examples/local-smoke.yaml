@@ -1,0 +1,19 @@
+tests:
+  - name: local-http-health
+    type: http
+    endpoint: http://127.0.0.1:8765/health
+    expect_status: [200]
+    expected_headers:
+      content-type: application/json
+    expect_body_json:
+      status: healthy
+      service: manual-smoke-server
+    execution_contexts: [local]
+    follow_redirects: false
+
+  - name: local-tcp-listener
+    type: tcp
+    host: 127.0.0.1
+    port: 8766
+    expect_open: true
+    execution_contexts: [local]

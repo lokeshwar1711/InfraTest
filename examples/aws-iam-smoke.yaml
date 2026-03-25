@@ -1,0 +1,8 @@
+tests:
+  - name: sts-caller-identity
+    type: aws_iam
+    service: sts
+    operation: get_caller_identity
+    region: us-east-1
+    expect_access: true
+    execution_contexts: [aws]

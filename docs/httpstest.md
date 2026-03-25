@@ -1,340 +1,112 @@
-# InfraTest — First Test Architecture (HTTP Validation Engine)
+# InfraTest — HTTP Validation Architecture
 
-## 📌 Purpose
+## Purpose
 
-This document defines the architecture of the **first executable capability** of InfraTest.
+This document describes the current HTTP validator behavior in the repository.
 
-The objective is to validate the InfraTest execution model through a minimal but meaningful infrastructure test.
+The original prototype proved basic status-code checks. The current implementation adds the controls needed for deployment-gate trust.
 
----
+## What The HTTP Validator Does Now
 
-# 🎯 Objective of First Test
+The HTTP validator can assert:
 
-The first supported validation:
+- one or more allowed status codes
+- redirect-following behavior
+- expected final URL after redirects
+- expected response headers
+- plain-text body containment
+- JSON body subset matching
+- retry policy and warmup delay
+- execution-context requirements
+- advisory vs blocking severity
 
-> Verify that a deployed HTTP endpoint responds as expected after infrastructure provisioning.
+## Why These Controls Matter
 
-This represents the smallest valuable infrastructure behavior check.
+Simple `GET` plus `200` checks create false confidence in real infrastructure.
 
----
+Examples:
 
-# 🧠 Why HTTP Validation First
+- a broken endpoint redirects to a generic landing page
+- a service returns `200` before its JSON payload is ready
+- a load balancer responds before the expected application version is actually serving traffic
+- a private endpoint is tested from a public runner and the result is misinterpreted
 
-Nearly all infrastructure deployments expose HTTP-based services:
+InfraTest therefore treats HTTP validation as behavioral verification, not just reachability.
 
-* Application Load Balancers
-* API Gateway endpoints
-* ECS services
-* Kubernetes ingress
-* internal service endpoints
+## Execution Lifecycle
 
-Failures frequently occur despite successful provisioning.
+### 1. Context Validation
 
----
+Before any request is sent, the engine checks whether the test's required `execution_contexts` match the active `--context` values supplied on the CLI.
 
-## Common Failure Scenarios
+If the run context is wrong, InfraTest records a failed result immediately.
 
-* incorrect security groups
-* failing health checks
-* routing misconfiguration
-* DNS propagation delays
-* service startup failure
-* blocked ports
+### 2. Optional Warmup Delay
 
-Terraform deployment success does not detect these issues.
+If `start_delay` is configured, InfraTest waits before the first attempt.
 
----
+This is useful for systems that are expected to become healthy shortly after provisioning.
 
-# 🧭 Position in Deployment Pipeline
+### 3. Request Execution
 
-```
-Terraform Apply
-        ↓
-InfraTest HTTP Validation
-        ↓
-Application Deployment
-```
+InfraTest creates an HTTP client using the test's redirect and TLS settings and performs the request with the configured method, headers, and timeout.
 
-InfraTest becomes a deployment confidence gate.
+### 4. Assertion Evaluation
 
----
+InfraTest evaluates the response in this order:
 
-# 🧱 Architectural Overview
+1. status code is allowed
+2. final URL matches when configured
+3. expected headers match
+4. body contains required text when configured
+5. JSON body contains the expected subset when configured
 
-```
-CLI Command
-     ↓
-Configuration Loader
-     ↓
-Model Validation
-     ↓
-Execution Engine
-     ↓
-HTTP Runner
-     ↓
-Result Aggregation
-     ↓
-Terminal Output
-```
+### 5. Retry Policy
 
-Each component remains independently extensible.
+If an attempt fails and retries are configured, InfraTest waits for `retry_interval` and tries again until the configured attempt count is exhausted.
 
----
+### 6. Result Reporting
 
-# ⚙️ Execution Lifecycle
+The validator returns a structured result with:
 
-## Step 1 — CLI Invocation
+- test name
+- type
+- severity
+- target
+- expected summary
+- actual summary
+- execution time
+- metadata such as final URL and redirect count
 
-User executes:
-
-```
-infratest verify infra-test.yaml
-```
-
-CLI responsibilities:
-
-* load configuration path
-* initiate execution engine
-* manage exit codes
-
----
-
-## Step 2 — Configuration Loading
-
-YAML configuration parsed into structured data.
-
-Example:
+## Configuration Example
 
 ```yaml
 tests:
   - name: api-health
     type: http
     endpoint: https://api.example.com/health
-    expect_status: 200
-    timeout: 5
+    expect_status: [200, 204]
+    expected_headers:
+      x-env: prod
+    expect_body_json:
+      status: healthy
+      details:
+        ready: true
+    follow_redirects: true
+    expected_final_url: https://api.example.com/health
+    retries: 2
+    retry_interval: 3
+    start_delay: 5
+    execution_contexts: [private-runner]
+    severity: blocking
 ```
 
----
+## Current Constraints
 
-## Step 3 — Schema Validation
+Still intentionally limited:
 
-Configuration validated via Pydantic models.
+- methods are `GET` and `HEAD`
+- TLS control is a boolean toggle, not a full certificate bundle workflow
+- execution is synchronous
 
-Ensures:
-
-* required fields exist
-* correct types
-* early failure detection
-
-Invalid configuration must fail before execution.
-
----
-
-## Step 4 — Test Dispatching
-
-Execution engine routes tests based on type.
-
-Example:
-
-```
-type=http → HTTP Runner
-```
-
-Future extensibility:
-
-```
-aws_rds
-tcp
-dns
-iam
-```
-
----
-
-# 🌐 HTTP Runner Architecture
-
-Core responsibility:
-
-Validate endpoint behavior.
-
----
-
-## Execution Steps
-
-### 1. Connection Attempt
-
-HTTP request initiated using httpx client.
-
-Parameters:
-
-* endpoint URL
-* timeout
-* HTTP method
-
----
-
-### 2. Response Capture
-
-System records:
-
-* status code
-* latency
-* connection errors
-
----
-
-### 3. Assertion Evaluation
-
-Validation logic:
-
-```
-response.status_code == expected_status
-```
-
-Failure categories:
-
-* timeout
-* DNS failure
-* connection refused
-* unexpected status
-
----
-
-### 4. Result Generation
-
-Structured result object created.
-
-Example:
-
-```
-TestResult(
-    name="api-health",
-    success=True,
-    message="200 OK"
-)
-```
-
----
-
-# 📊 Result Aggregation
-
-Execution engine collects all results.
-
-Responsibilities:
-
-* summarize outcomes
-* determine global success
-* prepare output layer
-
----
-
-# 🎨 Output Rendering
-
-Rich-based renderer produces readable output.
-
-Example:
-
-```
-Running Infra Tests...
-
-✔ api-health ........ PASS
-✖ auth-service ...... FAIL
-```
-
----
-
-# 🚦 Exit Code Behavior
-
-Critical for automation.
-
-| Result         | Exit Code |
-| -------------- | --------- |
-| All tests pass | 0         |
-| Any test fails | 1         |
-
-Allows CI systems to halt deployment automatically.
-
----
-
-# 🔄 Retry Strategy (Future)
-
-Initial version executes single attempt.
-
-Future enhancements:
-
-* retry policies
-* backoff strategy
-* warmup delays
-
-Not included in V1.
-
----
-
-# ⚡ Performance Considerations
-
-V1 executes sequentially.
-
-Future:
-
-* async parallel tests
-* connection pooling
-* grouped execution
-
----
-
-# 🔐 Security Considerations
-
-HTTP validation:
-
-* performs outbound requests only
-* stores no payload data
-* requires no elevated permissions
-
-Safe default execution model.
-
----
-
-# 🚫 Explicit Non-Goals
-
-First test will NOT include:
-
-* authentication handling
-* AWS API validation
-* SSL certificate inspection
-* traffic simulation
-* load testing
-
-Scope intentionally minimal.
-
----
-
-# ✅ Definition of Success
-
-First test architecture succeeds when:
-
-* CLI runs reliably
-* endpoint validation executes
-* failures detected automatically
-* CI pipelines react correctly
-
----
-
-# 🧭 Evolution Path
-
-HTTP validation enables future layers:
-
-1. TCP validation
-2. DNS verification
-3. AWS resource assertions
-4. IAM behavior checks
-5. Infrastructure regression testing
-
-The HTTP test forms the foundational execution engine.
-
----
-
-# 📌 Foundational Principle
-
-> Infrastructure correctness begins with verifying real behavior, not configuration state.
-
-InfraTest validates reality.
+Those constraints are acceptable for the current repository stage because the key deployment-trust gaps are already addressed.

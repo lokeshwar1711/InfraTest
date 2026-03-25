@@ -1,235 +1,192 @@
-# InfraTest — Infrastructure Validation After Deployment
+# InfraTest
 
-## 🚧 Problem
+InfraTest is a CLI verification engine for post-deployment infrastructure checks.
 
-Modern infrastructure is provisioned using Infrastructure as Code tools such as Terraform, CloudFormation, or Pulumi.
+It is designed to answer one operational question before application rollout:
 
-A typical deployment pipeline looks like:
+> Does this environment behave the way we expect from the network location and credentials we are actually using?
 
-```
-terraform plan
-terraform apply
-application deployment
-```
+## What Ships Today
 
-If infrastructure provisioning succeeds, teams usually assume the environment is ready.
+InfraTest currently supports three executable check types:
 
-However, **successful deployment does not guarantee functional infrastructure**.
+- HTTP checks with redirect control, retries, warmup delay, header assertions, JSON body subset assertions, and final URL assertions
+- TCP connectivity checks for open or closed ports
+- AWS runtime IAM checks by executing real boto3 client operations
 
-Common real-world failures still occur:
+Each test can also declare:
 
-* Services are unreachable despite successful deployment
-* Security groups block required traffic
-* Load balancer health checks fail
-* DNS resolution is incorrect
-* Internal services become publicly accessible
-* IAM permissions do not behave as expected
+- `severity`: `blocking` or `advisory`
+- `execution_contexts`: labels such as `public`, `private-runner`, `vpn`, `local`, or `aws`
+- retry policy: `retries`, `retry_interval`, `start_delay`
 
-These issues are often discovered **late**, during application deployment or production usage.
+InfraTest uses those contexts to avoid a common false-confidence trap: a check from the wrong network location is not treated as valid evidence.
 
-Today, infrastructure correctness is mostly verified through:
+## Why Execution Contexts Matter
 
-* manual validation
-* ad-hoc scripts
-* tribal knowledge
-* post-failure debugging
+If you want to prove an internal service is reachable only from a private network, the check must run from a private network. A public runner proving success or failure does not answer that question.
 
-Software systems have automated tests.
+InfraTest keeps this explicit:
 
-Infrastructure largely does not.
-
----
-
-## 🎯 Vision
-
-InfraTest aims to introduce a missing layer in modern delivery pipelines:
-
-> **Automated Infrastructure Testing after deployment.**
-
-Similar to how unit tests validate application behavior,
-InfraTest validates **deployed infrastructure behavior**.
-
-The goal is simple:
-
-```
-Provision Infrastructure
-        ↓
-Validate Infrastructure ✅
-        ↓
-Deploy Applications Safely
+```bash
+infratest verify infra-test.yaml --context private-runner
 ```
 
----
+If a test requires a context that is not active, InfraTest fails the test with an explicit execution-context mismatch.
 
-## ✅ What InfraTest Does (V1)
+## Install
 
-InfraTest runs automated assertions against live infrastructure immediately after deployment.
+```bash
+pip install -e .[dev]
+```
 
-Initial focus:
+## Quick Start
 
-* Endpoint reachability checks
-* Internal vs public accessibility validation
-* Port connectivity verification
-* DNS resolution validation
-* Health endpoint verification
+Run the sample suite in the repository:
 
-Example:
+```bash
+infratest verify infra-test.yaml --context public --output both --output-path artifacts/infratest/report.json
+```
+
+Exit codes:
+
+- `0`: all blocking checks passed, or only advisory checks failed
+- `1`: one or more blocking checks failed
+- `2`: InfraTest configuration or execution error
+
+## Example Configuration
 
 ```yaml
 tests:
-  - name: api-health
-    type: http
-    endpoint: https://api.example.com/health
-    expect_status: 200
-
-  - name: database-private
-    type: connectivity
-    host: db.internal
-    public_access: false
-```
-
-InfraTest executes these checks and returns:
-
-```
-PASS ✅
-or
-FAIL ❌
-```
-
-allowing CI/CD pipelines to stop unsafe deployments early.
-
----
-
-## 🧩 Where It Fits
-
-Typical CI/CD workflow:
-
-```
-Terraform Apply
-        ↓
-InfraTest Verify
-        ↓
-Application Deployment
-```
-
-InfraTest acts as a **post-deployment infrastructure validation layer**.
-
----
-
-## 👤 Who This Is For
-
-* DevOps Engineers
-* Platform Engineers
-* SRE Teams
-* Startup engineering teams managing AWS infrastructure
-* Teams using Terraform-based deployments
-
-Especially useful where infrastructure validation is currently manual.
-
----
-
-## 🚫 Non-Goals (V1)
-
-InfraTest is **not**:
-
-* a cloud cost optimization platform
-* a security compliance scanner
-* a chaos engineering framework
-* a monitoring system
-* a multi-cloud governance platform
-
-The focus is intentionally narrow:
-
-> Validate that deployed infrastructure behaves as expected.
-
----
-
-## ⚙️ Design Principles
-
-* Simple installation
-* CI/CD friendly
-* Declarative testing
-* Cloud-account minimal permissions
-* Fast feedback after deployment
-* Developer-first workflow
-
----
-
-## 🚀 Current Status
-
-✅ MVP implemented (HTTP validation engine, YAML-driven CLI, CI exit-code contract).
-
-Initial work focuses on defining:
-
-* core validation model
-* execution engine
-* pipeline integration workflow
-
----
-
-## 🛠️ Quick Start
-
-### 1) Install
-
-```bash
-pip install -e .
-```
-
-### 2) Run Verification
-
-```bash
-infratest verify infra-test.yaml
-```
-
-### 3) CI-Friendly JSON Report
-
-```bash
-infratest verify infra-test.yaml --output both --output-path infratest-report.json
-```
-
-Exit code contract:
-
-* `0` = all checks passed
-* `1` = one or more checks failed
-* `2` = InfraTest execution/configuration error
-
----
-
-## 🧪 Example YAML
-
-```yaml
-tests:
-        - name: api-health
+        - name: docs-home
                 type: http
-                endpoint: https://api.example.com/health
-                expect_status: 200
-                method: GET
-                timeout: 5
+                endpoint: https://example.com/
+                expect_status: [200]
+                follow_redirects: true
+                retries: 2
+                retry_interval: 2
+                expected_final_url: https://example.com/
+                execution_contexts: [public]
+
+        - name: docs-https-port
+                type: tcp
+                host: example.com
+                port: 443
+                expect_open: true
+                execution_contexts: [public]
+
+        - name: caller-identity
+                type: aws_iam
+                service: sts
+                operation: get_caller_identity
+                region: us-east-1
+                expect_access: true
+                execution_contexts: [aws]
+                severity: advisory
 ```
 
----
+## Check Types
 
-## 🗺️ Roadmap (Early Thoughts)
+### HTTP
 
-* [ ] Basic connectivity assertions
-* [ ] HTTP health validation
-* [ ] DNS checks
-* [ ] CI/CD integration
-* [ ] Terraform workflow examples
-* [ ] AWS-first support
+Supported fields:
 
----
+- `endpoint`
+- `expect_status`: single status code or list of allowed codes
+- `method`: `GET` or `HEAD`
+- `headers`
+- `body_contains`
+- `expect_body_json`
+- `expected_headers`
+- `follow_redirects`
+- `expected_final_url`
+- `tls_verify`
+- `timeout`
+- `retries`
+- `retry_interval`
+- `start_delay`
+- `severity`
+- `execution_contexts`
 
-## 💡 Why Now?
+### TCP
 
-Infrastructure complexity continues to grow, while deployment velocity increases.
+Supported fields:
 
-Automated infrastructure validation helps teams ship faster with confidence by catching environmental failures before they reach production.
+- `host`
+- `port`
+- `expect_open`
+- `timeout`
+- `retries`
+- `retry_interval`
+- `start_delay`
+- `severity`
+- `execution_contexts`
 
----
+### AWS IAM
 
-## 📌 Philosophy
+Supported fields:
 
-Infrastructure should be **tested**, not trusted.
+- `service`
+- `operation`
+- `region`
+- `parameters`
+- `expect_access`
+- `expected_error_codes`
+- `timeout`
+- `retries`
+- `retry_interval`
+- `start_delay`
+- `severity`
+- `execution_contexts`
 
----
+Example negative runtime access check:
+
+```yaml
+tests:
+        - name: prod-bucket-must-be-denied
+                type: aws_iam
+                service: s3
+                operation: head_bucket
+                parameters:
+                        Bucket: prod-secret-bucket
+                expect_access: false
+                expected_error_codes: [AccessDenied]
+                execution_contexts: [aws]
+```
+
+## Local Development
+
+The repository now includes:
+
+- deterministic unit tests for HTTP, TCP, AWS IAM, CLI, and config behavior
+- local smoke-test assets under `examples/`
+- a manual test runbook in [docs/COMMAND_RUNBOOK.md](docs/COMMAND_RUNBOOK.md)
+
+Run the full automated suite:
+
+```bash
+pytest
+```
+
+## Current Positioning
+
+InfraTest is ready to act as a customer-run verification engine in CI or controlled environments.
+
+It is not yet a hosted SaaS control plane. The technically credible path to selling it as a service is:
+
+- customer-run execution agents or runners inside the right network zones
+- a separate control plane for history, reporting, orchestration, and team workflows
+
+That separation is important because private-network validation is only meaningful when execution happens from the correct vantage point.
+
+## Current Scope Boundaries
+
+InfraTest is not currently:
+
+- a monitoring platform
+- a hosted dashboard product
+- a Terraform wrapper
+- a policy or compliance engine
+- a multi-cloud governance layer
+
+It is a deployment-readiness verification engine.

@@ -1,365 +1,114 @@
 # InfraTest — MVP Strategy
 
-## Purpose
+## Current MVP Shape
 
-This document defines the execution strategy for building the first usable version of InfraTest.
+InfraTest MVP is now a working CLI verification engine with three executable check families:
 
-The goal of the MVP is NOT completeness.
+- HTTP behavior checks
+- TCP reachability checks
+- AWS runtime IAM checks
 
-The goal is to deliver measurable infrastructure confidence as quickly as possible.
+The MVP input remains an explicit YAML file. The product value is still the same: block unsafe deployments after provisioning and before application rollout.
 
-This document constrains development scope to prevent over-engineering.
+## What The MVP Must Prove
 
----
+The MVP is successful only if teams can trust it as a deployment gate.
 
-# MVP Definition
+That means the following are more important than feature count:
 
-InfraTest MVP is:
+- deterministic exit codes
+- low false-positive rates
+- clear failure messages
+- verification from the correct execution context
 
-> A CLI tool that verifies infrastructure readiness after deployment and prevents unsafe application releases.
+## What Changed In Scope
 
-InfraTest must answer:
-
-"Is this environment safe to deploy into?"
-
----
-
-# Non-Goals (Critical)
-
-The MVP must NOT include:
-
-- SaaS dashboards
-- Web UI
-- Multi-cloud support
-- Plugin systems
-- Complex custom DSLs
-- AI automation
-- Complex configuration
-- Kubernetes-native orchestration
-- Enterprise workflows
-
-If a feature does not directly increase deployment confidence, it must be rejected.
-
----
-
-# Target User
-
-Primary User:
-
-Platform Engineers / DevOps Engineers who:
-
-- Use Terraform
-- Deploy to AWS
-- Maintain staging or production environments
-- Experience post-deployment infrastructure failures
-
----
-
-# MVP Workflow
-
-Expected usage:
-
-terraform apply
-|
-infratest verify infra-test.yaml
-
-
-Output:
-
-Environment Ready ✅
-or
-Deployment Unsafe ❌
-
-
-
-InfraTest integrates naturally into CI/CD pipelines.
-
-MVP input model:
-
-- YAML configuration file (`infra-test.yaml`) is required in V1
-- Keep schema intentionally small and explicit
-- Auto-discovery is a later enhancement, not a V1 dependency
-
----
-
-# MVP Success Criteria
-
-The MVP succeeds if:
-
-- A team detects at least one real infrastructure issue before deployment
-- InfraTest runs inside CI pipelines
-- Engineers trust InfraTest output
-- Setup time is under 5 minutes
-
----
-
-# MVP KPIs (Baseline)
-
-Track these from first internal pilot onward:
-
-- Time to first successful run: median under 10 minutes
-- Verification runtime per pipeline: p95 under 3 minutes
-- Exit code reliability: 100% deterministic (`0` pass / `1` fail / `2` execution error)
-- False positive rate: under 10% in first 30 days
-- Pre-deploy issues caught: at least 1 real issue in first 30 days of pilot usage
-- CI adoption: at least 2 pipelines gated by InfraTest before MVP completion
-
----
-
-# Supported Platform (Phase 1)
-
-Cloud Provider:
-- AWS ONLY
-
-Infrastructure Sources:
-- Terraform Outputs
-- Environment Metadata
-- Runtime Connectivity Checks
-
-Avoid abstraction layers early.
-
-Depth over breadth.
-
----
-
-# Core Validation Categories
-
-InfraTest MVP implements only the following validations.
-
----
-
-## 1. Service Reachability Validation
-
-Goal:
-Verify externally or internally exposed services respond correctly.
+InfraTest now explicitly models execution context. This matters because a check from the wrong network zone creates false confidence.
 
 Examples:
-- Load balancer reachable
-- DNS resolves
-- HTTP endpoint responds
-- Port accessibility
 
-Checks:
-- DNS resolution
-- TCP connectivity
-- HTTP status validation
+- a public runner cannot prove an internal load balancer works
+- a developer laptop cannot prove a VPC-only database is reachable from an ECS task
+- AWS IAM behavior checks only mean something when the command runs under the real workload credentials
 
----
+The MVP therefore treats context as first-class input, not documentation.
 
-## 2. Network Connectivity Validation
+## Supported Capabilities In This Repository
 
-Goal:
-Confirm services can communicate as expected.
+### HTTP
 
-Examples:
-- App → Database connectivity
-- Service → Internal API reachability
+- exact or multi-status assertions
+- retry policy and warmup delay
+- redirect control
+- final URL assertions
+- expected header assertions
+- JSON body subset assertions
+- advisory vs blocking severity
 
-Checks:
-- Port access
-- Route validation
-- Security group behavior
-- Internal DNS resolution
+### TCP
 
----
+- open-port validation
+- closed-port validation
+- retry policy and warmup delay
+- advisory vs blocking severity
 
-## 3. Runtime IAM Permission Validation
+### AWS Runtime IAM
 
-Goal:
-Verify permissions work during execution.
+- executes real boto3 client operations
+- supports positive and negative access expectations
+- supports expected AWS error-code matching
+- uses runtime credentials already available in the environment
 
-Examples:
-- EC2 accessing S3
-- Service role accessing secrets
-- Application accessing queues
+## MVP Commercialization Threshold
 
-Method:
-Real authentication attempt instead of policy inspection.
+This repository is credible as a customer-run execution engine.
 
----
+It is not yet a hosted SaaS product.
 
-## 4. Dependency Availability Validation
+To sell it safely as a service, the next architectural layer should be:
 
-Goal:
-Ensure required infrastructure dependencies are usable.
+- control plane for configuration, history, and team workflows
+- customer-run agents or runners inside the right network boundaries
+- context-aware scheduling so checks run from the right vantage point
 
-Examples:
-- Database reachable
-- Cache reachable
-- Message queue accessible
+Without that separation, private-network validation claims are weak.
 
----
+## Immediate KPIs
 
-# Expected CLI Output
+- first-run setup under 10 minutes
+- fully deterministic test suite in CI
+- blocking failures stop deployment reliably
+- advisory failures remain visible without stopping deployment
+- at least one real infrastructure issue caught before rollout
 
-Example:
+## Short-Term Roadmap
 
-InfraTest Verification Report
+### Phase 1
 
-DNS Resolution ✅ PASS
-Load Balancer Reachability ✅ PASS
-Service Connectivity ❌ FAIL
-IAM Runtime Access ✅ PASS
+- stabilize the current HTTP, TCP, and AWS validators in real pilot environments
+- capture real failure examples and reduce false positives
 
-Environment Score: 75%
-Deployment Blocked
+### Phase 2
 
+- add more AWS runtime checks for common services
+- add better negative-path network assertions
+- add richer response assertions where customers need them
 
-Output must be human-readable first.
+### Phase 3
 
-Machine-readable output comes later.
+- add control-plane concepts without weakening the customer-run execution model
 
----
+## Anti-Scope Still Applies
 
-# Architecture Overview
+The MVP must still avoid:
 
-Terraform Outputs
-↓
-InfraTest CLI
-↓
-Validation Engine
-↓
-Check Modules
-↓
-Pass / Fail Result
+- dashboards before execution trust is earned
+- policy-engine sprawl
+- generic workflow orchestration
+- hosted execution that cannot reach private customer networks
 
-InfraTest must run without persistent services.
+## Guiding Principle
 
----
+InfraTest should make an engineer comfortable saying:
 
-# Configuration Philosophy
-
-Configuration must be minimal.
-
-V1 approach:
-
-infratest verify infra-test.yaml
-
-InfraTest should provide a simple YAML schema with sensible defaults.
-
-Auto-discovery remains a post-MVP milestone after core verification stability is proven.
-
----
-
-# Development Phases
-
----
-
-## Phase 0 — Bootstrap
-
-Goals:
-- CLI skeleton
-- Command parsing
-- Logging system
-- Result reporting
-
-Deliverable:
-Working CLI executable.
-
----
-
-## Phase 1 — First Validation
-
-Implement:
-- HTTP reachability check
-
-Goal:
-Catch real failures quickly.
-
-Ship immediately after working.
-
----
-
-## Phase 2 — Connectivity Checks
-
-Add:
-- TCP connectivity validation
-- Internal service access tests
-
-Goal:
-Detect networking issues.
-
----
-
-## Phase 3 — IAM Runtime Checks
-
-Add:
-- AWS credential execution tests
-
-Goal:
-Differentiate InfraTest from existing tools.
-
----
-
-## Phase 4 — CI Integration
-
-Support:
-- Exit codes
-- JSON output
-- Pipeline blocking
-
-InfraTest becomes deployment gate.
-
----
-
-## Phase 5 — Auto-Discovery (Post-MVP)
-
-Add:
-- optional expectation inference from Terraform outputs
-- environment context hints
-
-Goal:
-reduce manual YAML over time without increasing MVP complexity.
-
----
-
-# Explicit Anti-Scope Rules
-
-Reject features involving:
-
-- dashboards
-- authentication systems
-- user accounts
-- hosted backend
-- metrics storage
-- visualization
-
-InfraTest is a verification engine first.
-
----
-
-# MVP Completion Definition
-
-MVP is complete when:
-
-- InfraTest blocks a broken deployment in real usage
-- At least one external team can run it successfully
-- CI integration works reliably
-
-Do not expand scope before this point.
-
----
-
-# Post-MVP Direction (Preview Only)
-
-After validation:
-
-Possible expansions:
-
-- Environment scoring
-- Continuous verification
-- Drift detection
-- Kubernetes validation
-- Hosted SaaS layer
-
-These are NOT MVP concerns.
-
----
-
-# Guiding Principle
-
-InfraTest should make engineers feel:
-
-"I trust this environment."
-
-Every feature must move toward that outcome.
+> This environment was verified from the right place, with the right credentials, against the right behaviors.

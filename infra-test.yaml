@@ -1,14 +1,20 @@
 tests:
-  - name: api-health
-    type: http
-    endpoint: https://httpbin.org/status/200
-    expect_status: 200
-    method: GET
-    timeout: 5
-
   - name: docs-home
     type: http
     endpoint: https://example.com/
-    expect_status: 200
+    expect_status: [200]
     method: GET
     timeout: 5
+    follow_redirects: true
+    retries: 2
+    retry_interval: 2
+    expected_final_url: https://example.com/
+    execution_contexts: [public]
+
+  - name: docs-https-port
+    type: tcp
+    host: example.com
+    port: 443
+    expect_open: true
+    timeout: 5
+    execution_contexts: [public]

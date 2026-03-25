@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "total": 2,
+  "passed": 2,
+  "failed": 0,
+  "results": [
+    {
+      "name": "local-http-health",
+      "type": "http",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "200 OK",
+      "execution_time_ms": 1622,
+      "target": "http://127.0.0.1:8765/health",
+      "expected": "status in [200]; headers=content-type; json subset",
+      "actual": "status=200; final_url=http://127.0.0.1:8765/health",
+      "metadata": {
+        "http_version": "HTTP/1.0",
+        "final_url": "http://127.0.0.1:8765/health",
+        "redirect_count": "0",
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "local-tcp-listener",
+      "type": "tcp",
+      "severity": "blocking",
+      "status": "PASS",
+      "message": "TCP connection succeeded",
+      "execution_time_ms": 1,
+      "target": "127.0.0.1:8766",
+      "expected": "port open",
+      "actual": "connection opened",
+      "metadata": {
+        "attempt": 1,
+        "max_attempts": 1
+      }
+    }
+  ],
+  "blocking_failed": 0,
+  "advisory_failed": 0
+}
